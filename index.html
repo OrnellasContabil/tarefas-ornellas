@@ -609,7 +609,8 @@
 <script>
 // ── Config ──
 const CFG_KEY = 'ornellas_cfg';
-const PRESET_KEY = '$2a$10$gQD5yeSROCjd.L1AsncjO.N6KXSzJpGfH0rNk2Uj3D/z30JZZb3.2';
+const PRESET_KEY  = '$2a$10$8nPXUSpe8126WRXKU3GmVutk59kWBJ4L6dJ7pD0ou50kzYMCbWgrW';
+const PRESET_BIN  = '69d8e43aaaba882197e3d5de';
 const PRESET_NAME = 'Ornellas Soluções Contábeis';
 let cfg = null;
 let tasks = [];
@@ -627,36 +628,13 @@ function saveCfg() {
 
 async function init() {
   loadCfg();
-  if (cfg && cfg.apiKey && cfg.binId) {
-    showApp();
-    return;
-  }
-  // First run: auto-create bin with preset key
-  document.getElementById('setup-screen').style.display = 'none';
-  document.getElementById('app-screen').style.display = 'block';
-  document.getElementById('header-name').textContent = PRESET_NAME;
-  document.getElementById('task-list').innerHTML = '<div class="empty"><div class="spinner" style="margin:0 auto 1rem;display:block"></div>Conectando ao banco de dados\u2026</div>';
-  try {
-    const res = await fetch('https://api.jsonbin.io/v3/b', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Master-Key': PRESET_KEY,
-        'X-Bin-Name': 'ornellas-tarefas',
-      },
-      body: JSON.stringify({ tasks: [] })
-    });
-    if (!res.ok) throw new Error('Falha na conexao.');
-    const data = await res.json();
-    cfg = { apiKey: PRESET_KEY, binId: data.metadata.id, name: PRESET_NAME };
+  // Always ensure the fixed bin is used
+  if (!cfg || cfg.binId !== PRESET_BIN) {
+    cfg = { apiKey: PRESET_KEY, binId: PRESET_BIN, name: PRESET_NAME };
     saveCfg();
-    showApp();
-  } catch(e) {
-    document.getElementById('app-screen').style.display = 'none';
-    document.getElementById('setup-screen').style.display = 'flex';
-    document.getElementById('setup-apikey').value = PRESET_KEY;
-    document.getElementById('setup-name').value = PRESET_NAME;
   }
+  document.getElementById('setup-screen').style.display = 'none';
+  showApp();
 }
 
 // ── Setup ──
