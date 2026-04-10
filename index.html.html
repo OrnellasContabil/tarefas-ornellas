@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestão de Tarefas — Ornellas Soluções Contábeis</title>
+<style>
+  :root {
+    --bg: #f8f7f4;
+    --surface: #ffffff;
+    --surface2: #f1f0ed;
+    --border: #e2e1dc;
+    --border2: #cccbc5;
+    --text: #1a1a18;
+    --text2: #6b6a65;
+    --text3: #9e9d98;
+    --accent: #1d5fa8;
+    --accent-bg: #e8f0fb;
+    --success-bg: #eaf3de;
+    --success-text: #3b6d11;
+    --success-border: #c0dd97;
+    --warn-bg: #faeeda;
+    --warn-text: #854f0b;
+    --danger-bg: #fcebeb;
+    --danger-text: #a32d2d;
+    --danger-border: #f7c1c1;
+    --alta-bg: #faece7;
+    --alta-text: #993c1d;
+    --media-bg: #faeeda;
+    --media-text: #854f0b;
+    --baixa-bg: #eaf3de;
+    --baixa-text: #3b6d11;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #181816;
+      --surface: #222220;
+      --surface2: #2a2a28;
+      --border: #333331;
+      --border2: #444440;
+      --text: #f0efe9;
+      --text2: #9e9d98;
+      --text3: #6b6a65;
+      --accent: #5b9de8;
+      --accent-bg: #1a2d44;
+      --success-bg: #17300a;
+      --success-text: #c0dd97;
+      --success-border: #3b6d11;
+      --warn-bg: #2e1f05;
+      --warn-text: #fac775;
+      --danger-bg: #2a0f0f;
+      --danger-text: #f09595;
+      --danger-border: #791f1f;
+      --alta-bg: #2e1208;
+      --alta-text: #f0997b;
+      --media-bg: #2e1f05;
+      --media-text: #fac775;
+      --baixa-bg: #17300a;
+      --baixa-text: #c0dd97;
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── Setup screen ── */
+  #setup-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+  .setup-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: var(--shadow);
+  }
+  .setup-logo {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: .25rem;
+  }
+  .setup-sub {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 1.5rem;
+  }
+  .setup-step {
+    background: var(--surface2);
+    border-radius: var(--radius);
+    padding: .75rem 1rem;
+    margin-bottom: .75rem;
+    font-size: 13px;
+    color: var(--text2);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .setup-num {
+    background: var(--accent-bg);
+    color: var(--accent);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .setup-step a { color: var(--accent); }
+  .setup-divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+  .setup-form label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 4px; margin-top: .75rem; }
+  .setup-form input {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 13px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    font-family: inherit;
+  }
+  .setup-form input:focus { outline: none; border-color: var(--accent); }
+  .btn-primary {
+    margin-top: 1rem;
+    width: 100%;
+    padding: 9px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    transition: opacity .15s;
+  }
+  .btn-primary:hover { opacity: .88; }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+  .setup-error {
+    margin-top: .75rem;
+    font-size: 12px;
+    color: var(--danger-text);
+    background: var(--danger-bg);
+    border-radius: var(--radius);
+    padding: .5rem .75rem;
+  }
+
+  /* ── Main app ── */
+  #app-screen { display: none; }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: .75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .header-left { display: flex; align-items: center; gap: 10px; }
+  .logo { font-size: 15px; font-weight: 600; color: var(--text); }
+  .logo-sub { font-size: 12px; color: var(--text2); }
+  .badge-shared {
+    font-size: 11px;
+    padding: 2px 8px;
+    background: var(--accent-bg);
+    color: var(--accent);
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .header-right { display: flex; gap: 6px; align-items: center; }
+  .sync-label { font-size: 11px; color: var(--text3); }
+
+  .main { max-width: 860px; margin: 0 auto; padding: 1.25rem 1.25rem; }
+
+  /* metrics */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 1.25rem; }
+  @media(max-width:540px){ .metrics { grid-template-columns: repeat(2,1fr); } }
+  .metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: .75rem 1rem;
+  }
+  .metric-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+  .metric-value { font-size: 24px; font-weight: 600; color: var(--text); }
+  .metric-value.danger { color: var(--danger-text); }
+
+  /* toolbar */
+  .toolbar { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .toolbar input, .toolbar select {
+    padding: 7px 10px;
+    font-size: 13px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    font-family: inherit;
+  }
+  .toolbar input { flex: 1; min-width: 140px; }
+  .toolbar input:focus, .toolbar select:focus { outline: none; border-color: var(--accent); }
+
+  /* tabs */
+  .tabs { display: flex; gap: 4px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .tab {
+    padding: 5px 12px;
+    font-size: 12px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    cursor: pointer;
+    background: var(--surface);
+    color: var(--text2);
+    transition: all .15s;
+  }
+  .tab:hover { border-color: var(--border2); color: var(--text); }
+  .tab.active { background: var(--surface2); color: var(--text); font-weight: 500; border-color: var(--border2); }
+
+  /* buttons */
+  .btn {
+    padding: 7px 14px;
+    font-size: 13px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    transition: background .15s;
+  }
+  .btn:hover { background: var(--surface2); }
+  .btn-new {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    font-weight: 500;
+  }
+  .btn-new:hover { opacity: .88; background: var(--accent); }
+  .btn-sm {
+    padding: 4px 8px;
+    font-size: 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: none;
+    color: var(--text2);
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s;
+  }
+  .btn-sm:hover { background: var(--surface2); color: var(--text); }
+  .btn-icon {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--text3);
+    padding: 4px 6px;
+    border-radius: 6px;
+    font-size: 15px;
+    line-height: 1;
+    transition: background .12s, color .12s;
+  }
+  .btn-icon:hover { background: var(--surface2); color: var(--text); }
+
+  /* task list */
+  .task-list { display: flex; flex-direction: column; gap: 6px; }
+  .task-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: .85rem 1rem;
+    display: grid;
+    grid-template-columns: 22px 1fr auto;
+    gap: 10px;
+    align-items: start;
+    box-shadow: var(--shadow);
+    transition: border-color .15s;
+  }
+  .task-card:hover { border-color: var(--border2); }
+  .task-card.done { opacity: .5; }
+  .task-card.done .task-title { text-decoration: line-through; }
+
+  .check {
+    width: 20px; height: 20px;
+    border: 1.5px solid var(--border2);
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    background: var(--surface);
+    transition: all .15s;
+  }
+  .check:hover { border-color: var(--success-border); }
+  .check.checked { background: var(--success-bg); border-color: var(--success-border); }
+  .checkmark { display: none; }
+  .check.checked .checkmark { display: block; }
+
+  .task-body { min-width: 0; }
+  .task-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 5px; word-break: break-word; }
+  .task-client { font-size: 12px; color: var(--text2); margin-bottom: 5px; }
+  .task-desc { font-size: 12px; color: var(--text2); margin-top: 5px; }
+  .task-meta { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+
+  .badge {
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .badge-alta { background: var(--alta-bg); color: var(--alta-text); }
+  .badge-media { background: var(--media-bg); color: var(--media-text); }
+  .badge-baixa { background: var(--baixa-bg); color: var(--baixa-text); }
+  .badge-cat { background: var(--surface2); color: var(--text2); font-weight: 400; }
+  .badge-vencida { background: var(--danger-bg); color: var(--danger-text); }
+  .task-date { font-size: 11px; color: var(--text3); }
+
+  .task-actions { display: flex; flex-direction: column; gap: 2px; align-items: flex-end; }
+
+  /* empty */
+  .empty { text-align: center; padding: 3rem 1rem; color: var(--text3); font-size: 14px; }
+  .empty-icon { font-size: 32px; margin-bottom: .75rem; opacity: .4; }
+
+  /* modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.4);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.15);
+    animation: slideUp .18s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+  .modal-title { font-size: 15px; font-weight: 600; color: var(--text); }
+
+  .form-group { margin-bottom: .85rem; }
+  .form-group label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 4px; font-weight: 500; }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 13px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    font-family: inherit;
+    transition: border-color .15s;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus { outline: none; border-color: var(--accent); }
+  .form-group textarea { resize: vertical; min-height: 70px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media(max-width:400px){ .form-row { grid-template-columns: 1fr; } }
+
+  .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1.25rem; }
+
+  /* loading spinner */
+  .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* notification toast */
+  #toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--text);
+    color: var(--surface);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    opacity: 0;
+    transition: all .25s;
+    pointer-events: none;
+    z-index: 200;
+    white-space: nowrap;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* settings btn */
+  .btn-settings {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--text3);
+    font-size: 16px;
+    padding: 4px 6px;
+    border-radius: 6px;
+  }
+  .btn-settings:hover { background: var(--surface2); color: var(--text2); }
+</style>
+</head>
+<body>
+
+<!-- ── Setup Screen ── -->
+<div id="setup-screen">
+  <div class="setup-card">
+    <div class="setup-logo">Gestão de Tarefas</div>
+    <div class="setup-sub">Ornellas Soluções Contábeis — Configuração inicial</div>
+
+    <div class="setup-step">
+      <div class="setup-num">1</div>
+      <div>Acesse <a href="https://jsonbin.io" target="_blank">jsonbin.io</a> e crie uma conta gratuita.</div>
+    </div>
+    <div class="setup-step">
+      <div class="setup-num">2</div>
+      <div>No painel, vá em <strong>API Keys</strong> → crie uma chave e copie-a aqui embaixo.</div>
+    </div>
+    <div class="setup-step">
+      <div class="setup-num">3</div>
+      <div>Clique em <strong>Conectar</strong>. Um banco de dados será criado automaticamente.</div>
+    </div>
+
+    <hr class="setup-divider">
+
+    <div class="setup-form">
+      <label>Chave de API (JSONBin)</label>
+      <input type="password" id="setup-apikey" placeholder="$2a$10$..." autocomplete="off">
+      <label style="margin-top:.75rem">Nome do escritório (aparece no cabeçalho)</label>
+      <input type="text" id="setup-name" value="Ornellas Soluções Contábeis" placeholder="Nome do escritório">
+      <button class="btn-primary" id="btn-connect" onclick="setupConnect()">Conectar e começar</button>
+      <div id="setup-error" class="setup-error" style="display:none"></div>
+    </div>
+
+    <p style="font-size:11px;color:var(--text3);margin-top:1rem;text-align:center">
+      Depois de configurar, compartilhe este arquivo HTML com sua equipe.<br>
+      Todos usarão a mesma chave e verão as mesmas tarefas.
+    </p>
+  </div>
+</div>
+
+<!-- ── App ── -->
+<div id="app-screen">
+  <header>
+    <div class="header-left">
+      <div>
+        <div class="logo" id="header-name">Gestão de Tarefas</div>
+        <div class="logo-sub">Ornellas Soluções Contábeis</div>
+      </div>
+      <span class="badge-shared">Compartilhado</span>
+    </div>
+    <div class="header-right">
+      <span class="sync-label" id="sync-label"></span>
+      <button class="btn btn-sm" onclick="loadTasks(true)" id="btn-refresh">↻ Atualizar</button>
+      <button class="btn btn-new" onclick="openModal()">+ Nova tarefa</button>
+      <button class="btn-settings" onclick="openSettings()" title="Configurações">⚙</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <div class="metrics" id="metrics"></div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:.75rem">
+      <div class="tabs" id="tabs"></div>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" id="search" placeholder="Buscar por tarefa ou cliente…" oninput="renderList()">
+      <select id="filter-pri" onchange="renderList()">
+        <option value="">Todas prioridades</option>
+        <option>Alta</option><option>Média</option><option>Baixa</option>
+      </select>
+      <select id="filter-cat" onchange="renderList()">
+        <option value="">Todas categorias</option>
+        <option>Contabilidade</option><option>Fiscal</option><option>RH</option>
+        <option>Societário</option><option>IRPF</option><option>Pessoal</option><option>Outros</option>
+      </select>
+    </div>
+
+    <div class="task-list" id="task-list">
+      <div class="empty"><div class="empty-icon">📋</div>Carregando tarefas…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Task Modal ── -->
+<div class="modal-overlay" id="modal" onclick="closeOnBg(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Nova tarefa</div>
+      <button class="btn-icon" onclick="closeModal()">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Título *</label>
+      <input id="f-title" type="text" placeholder="Ex: Entregar DIRPF — João Silva">
+    </div>
+    <div class="form-group">
+      <label>Cliente / Empresa</label>
+      <input id="f-client" type="text" placeholder="Nome do cliente (opcional)">
+    </div>
+    <div class="form-group">
+      <label>Descrição</label>
+      <textarea id="f-desc" placeholder="Detalhes adicionais…"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Prioridade</label>
+        <select id="f-pri">
+          <option>Alta</option><option selected>Média</option><option>Baixa</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Categoria</label>
+        <select id="f-cat">
+          <option>Contabilidade</option><option>Fiscal</option><option>RH</option>
+          <option>Societário</option><option>IRPF</option><option>Pessoal</option><option>Outros</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Data de vencimento</label>
+        <input id="f-due" type="date">
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="f-status">
+          <option value="pendente">Pendente</option>
+          <option value="andamento">Em andamento</option>
+          <option value="concluido">Concluído</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-new" id="btn-save" onclick="saveTask()">Salvar tarefa</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Settings Modal ── -->
+<div class="modal-overlay" id="settings-modal" onclick="closeSettingsBg(event)">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-title">Configurações</div>
+      <button class="btn-icon" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Chave de API (JSONBin)</label>
+      <input type="password" id="s-apikey" placeholder="$2a$10$…">
+    </div>
+    <div class="form-group">
+      <label>Bin ID</label>
+      <input type="text" id="s-binid" placeholder="Preenchido automaticamente">
+    </div>
+    <div class="form-group">
+      <label>Nome do escritório</label>
+      <input type="text" id="s-name" placeholder="Ornellas Soluções Contábeis">
+    </div>
+    <div class="modal-footer">
+      <button class="btn" style="color:var(--danger-text)" onclick="resetConfig()">Redefinir</button>
+      <button class="btn btn-new" onclick="saveSettings()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── Config ──
+const CFG_KEY = 'ornellas_cfg';
+const PRESET_KEY = '$2a$10$gQD5yeSROCjd.L1AsncjO.N6KXSzJpGfH0rNk2Uj3D/z30JZZb3.2';
+const PRESET_NAME = 'Ornellas Soluções Contábeis';
+let cfg = null;
+let tasks = [];
+let editId = null;
+let activeTab = 'all';
+let syncing = false;
+
+function loadCfg() {
+  try { cfg = JSON.parse(localStorage.getItem(CFG_KEY)); } catch(e) { cfg = null; }
+}
+
+function saveCfg() {
+  localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
+}
+
+async function init() {
+  loadCfg();
+  if (cfg && cfg.apiKey && cfg.binId) {
+    showApp();
+    return;
+  }
+  // First run: auto-create bin with preset key
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  document.getElementById('header-name').textContent = PRESET_NAME;
+  document.getElementById('task-list').innerHTML = '<div class="empty"><div class="spinner" style="margin:0 auto 1rem;display:block"></div>Conectando ao banco de dados\u2026</div>';
+  try {
+    const res = await fetch('https://api.jsonbin.io/v3/b', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': PRESET_KEY,
+        'X-Bin-Name': 'ornellas-tarefas',
+      },
+      body: JSON.stringify({ tasks: [] })
+    });
+    if (!res.ok) throw new Error('Falha na conexao.');
+    const data = await res.json();
+    cfg = { apiKey: PRESET_KEY, binId: data.metadata.id, name: PRESET_NAME };
+    saveCfg();
+    showApp();
+  } catch(e) {
+    document.getElementById('app-screen').style.display = 'none';
+    document.getElementById('setup-screen').style.display = 'flex';
+    document.getElementById('setup-apikey').value = PRESET_KEY;
+    document.getElementById('setup-name').value = PRESET_NAME;
+  }
+}
+
+// ── Setup ──
+async function setupConnect() {
+  const apiKey = document.getElementById('setup-apikey').value.trim();
+  const name   = document.getElementById('setup-name').value.trim() || 'Ornellas Soluções Contábeis';
+  const errEl  = document.getElementById('setup-error');
+  const btn    = document.getElementById('btn-connect');
+
+  errEl.style.display = 'none';
+  if (!apiKey) { showSetupError('Informe a chave de API.'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Conectando…';
+
+  try {
+    // Create a new bin with empty tasks array
+    const res = await fetch('https://api.jsonbin.io/v3/b', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': apiKey,
+        'X-Bin-Name': 'ornellas-tarefas',
+        'X-Collection-Name': 'Ornellas'
+      },
+      body: JSON.stringify({ tasks: [] })
+    });
+
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      throw new Error(d.message || 'Chave inválida ou erro de conexão.');
+    }
+
+    const data = await res.json();
+    cfg = { apiKey, binId: data.metadata.id, name };
+    saveCfg();
+    showApp();
+  } catch(e) {
+    showSetupError(e.message);
+    btn.disabled = false;
+    btn.textContent = 'Conectar e começar';
+  }
+}
+
+function showSetupError(msg) {
+  const el = document.getElementById('setup-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+// ── App ──
+function showApp() {
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  document.getElementById('header-name').textContent = cfg.name || 'Gestão de Tarefas';
+  loadTasks(true);
+  setInterval(loadTasks, 30000);
+}
+
+async function loadTasks(showSpinner) {
+  if (syncing) return;
+  syncing = true;
+  if (showSpinner) {
+    document.getElementById('btn-refresh').innerHTML = '<span class="spinner"></span>';
+  }
+
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${cfg.binId}/latest`, {
+      headers: { 'X-Master-Key': cfg.apiKey }
+    });
+    if (!res.ok) throw new Error('Falha ao carregar.');
+    const data = await res.json();
+    tasks = data.record.tasks || [];
+    const now = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('sync-label').textContent = 'Atualizado às ' + now;
+  } catch(e) {
+    toast('Erro ao sincronizar: ' + e.message);
+  }
+
+  syncing = false;
+  document.getElementById('btn-refresh').textContent = '↻ Atualizar';
+  renderAll();
+}
+
+async function persistTasks() {
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${cfg.binId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': cfg.apiKey
+      },
+      body: JSON.stringify({ tasks })
+    });
+    if (!res.ok) throw new Error('Falha ao salvar.');
+  } catch(e) {
+    toast('Erro ao salvar: ' + e.message);
+  }
+}
+
+// ── CRUD ──
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+function openModal(id) {
+  editId = id || null;
+  const t = id ? tasks.find(x => x.id === id) : null;
+  document.getElementById('modal-title').textContent = id ? 'Editar tarefa' : 'Nova tarefa';
+  document.getElementById('f-title').value  = t ? t.title  : '';
+  document.getElementById('f-client').value = t ? t.client : '';
+  document.getElementById('f-desc').value   = t ? t.desc   : '';
+  document.getElementById('f-pri').value    = t ? t.pri    : 'Média';
+  document.getElementById('f-cat').value    = t ? t.cat    : 'Contabilidade';
+  document.getElementById('f-due').value    = t ? t.due    : '';
+  document.getElementById('f-status').value = t ? t.status : 'pendente';
+  document.getElementById('modal').classList.add('open');
+  setTimeout(() => document.getElementById('f-title').focus(), 50);
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function closeOnBg(e) { if (e.target === document.getElementById('modal')) closeModal(); }
+
+async function saveTask() {
+  const title = document.getElementById('f-title').value.trim();
+  if (!title) { document.getElementById('f-title').focus(); return; }
+
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+
+  const t = {
+    id:     editId || genId(),
+    title,
+    client: document.getElementById('f-client').value.trim(),
+    desc:   document.getElementById('f-desc').value.trim(),
+    pri:    document.getElementById('f-pri').value,
+    cat:    document.getElementById('f-cat').value,
+    due:    document.getElementById('f-due').value,
+    status: document.getElementById('f-status').value,
+    created: editId ? (tasks.find(x => x.id === editId) || {}).created || Date.now() : Date.now()
+  };
+
+  if (editId) { const i = tasks.findIndex(x => x.id === editId); tasks[i] = t; }
+  else tasks.unshift(t);
+
+  await persistTasks();
+  btn.disabled = false;
+  btn.textContent = 'Salvar tarefa';
+  closeModal();
+  toast(editId ? 'Tarefa atualizada.' : 'Tarefa criada.');
+  renderAll();
+}
+
+async function deleteTask(id) {
+  if (!confirm('Excluir esta tarefa permanentemente?')) return;
+  tasks = tasks.filter(x => x.id !== id);
+  await persistTasks();
+  toast('Tarefa excluída.');
+  renderAll();
+}
+
+async function toggleDone(id) {
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  t.status = t.status === 'concluido' ? 'pendente' : 'concluido';
+  await persistTasks();
+  renderAll();
+}
+
+// ── Render ──
+function isVencida(due, status) {
+  if (!due || status === 'concluido') return false;
+  return new Date(due) < new Date(new Date().toDateString());
+}
+
+function fmtDate(d) {
+  if (!d) return '';
+  const [y, m, day] = d.split('-');
+  return `${day}/${m}/${y}`;
+}
+
+function esc(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function setTab(id) { activeTab = id; renderAll(); }
+
+function renderAll() {
+  renderMetrics();
+  renderTabs();
+  renderList();
+}
+
+function renderMetrics() {
+  const total    = tasks.length;
+  const done     = tasks.filter(t => t.status === 'concluido').length;
+  const alta     = tasks.filter(t => t.pri === 'Alta' && t.status !== 'concluido').length;
+  const vencidas = tasks.filter(t => isVencida(t.due, t.status)).length;
+  const pct      = total ? Math.round((done / total) * 100) : 0;
+
+  document.getElementById('metrics').innerHTML = `
+    <div class="metric">
+      <div class="metric-label">Total de tarefas</div>
+      <div class="metric-value">${total}</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Concluídas</div>
+      <div class="metric-value">${done} <span style="font-size:14px;color:var(--text2)">(${pct}%)</span></div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Prioridade alta</div>
+      <div class="metric-value">${alta}</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Vencidas</div>
+      <div class="metric-value ${vencidas > 0 ? 'danger' : ''}">${vencidas}</div>
+    </div>`;
+}
+
+function renderTabs() {
+  const counts = {
+    all: tasks.length,
+    pendente: tasks.filter(t => t.status === 'pendente').length,
+    andamento: tasks.filter(t => t.status === 'andamento').length,
+    concluido: tasks.filter(t => t.status === 'concluido').length,
+  };
+  const defs = [
+    { id: 'all',      label: 'Todas' },
+    { id: 'pendente', label: 'Pendentes' },
+    { id: 'andamento',label: 'Em andamento' },
+    { id: 'concluido',label: 'Concluídas' },
+  ];
+  document.getElementById('tabs').innerHTML = defs.map(tb =>
+    `<div class="tab${activeTab === tb.id ? ' active' : ''}" onclick="setTab('${tb.id}')">
+      ${tb.label} <span style="opacity:.6;font-size:11px">${counts[tb.id]}</span>
+    </div>`
+  ).join('');
+}
+
+function renderList() {
+  const q  = (document.getElementById('search').value || '').toLowerCase();
+  const fp = document.getElementById('filter-pri').value;
+  const fc = document.getElementById('filter-cat').value;
+
+  let list = tasks.filter(t => {
+    if (activeTab !== 'all' && t.status !== activeTab) return false;
+    if (fp && t.pri !== fp) return false;
+    if (fc && t.cat !== fc) return false;
+    if (q && !t.title.toLowerCase().includes(q) && !(t.client || '').toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  if (!list.length) {
+    document.getElementById('task-list').innerHTML =
+      `<div class="empty"><div class="empty-icon">📋</div>Nenhuma tarefa encontrada.</div>`;
+    return;
+  }
+
+  const priOrd = { Alta: 0, Média: 1, Baixa: 2 };
+  list.sort((a, b) => {
+    const av = isVencida(a.due, a.status) ? -1 : 0;
+    const bv = isVencida(b.due, b.status) ? -1 : 0;
+    if (av !== bv) return av - bv;
+    return (priOrd[a.pri] || 1) - (priOrd[b.pri] || 1);
+  });
+
+  document.getElementById('task-list').innerHTML = list.map(t => {
+    const done = t.status === 'concluido';
+    const venc = isVencida(t.due, t.status);
+    const priClass = t.pri === 'Alta' ? 'alta' : t.pri === 'Média' ? 'media' : 'baixa';
+    return `
+      <div class="task-card${done ? ' done' : ''}">
+        <div class="check${done ? ' checked' : ''}" onclick="toggleDone('${t.id}')">
+          <svg class="checkmark" width="12" height="12" viewBox="0 0 12 12">
+            <polyline points="2,6 5,9 10,3" fill="none" stroke="var(--success-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="task-body">
+          <div class="task-title">${esc(t.title)}</div>
+          ${t.client ? `<div class="task-client">👤 ${esc(t.client)}</div>` : ''}
+          <div class="task-meta">
+            <span class="badge badge-${priClass}">${t.pri}</span>
+            <span class="badge badge-cat">${t.cat}</span>
+            ${t.due ? `<span class="${venc ? 'badge badge-vencida' : 'task-date'}">${venc ? '⚠ Vencida: ' : ''}${fmtDate(t.due)}</span>` : ''}
+          </div>
+          ${t.desc ? `<div class="task-desc">${esc(t.desc).substring(0, 150)}${t.desc.length > 150 ? '…' : ''}</div>` : ''}
+        </div>
+        <div class="task-actions">
+          <button class="btn-icon" onclick="openModal('${t.id}')" title="Editar">✎</button>
+          <button class="btn-icon" onclick="deleteTask('${t.id}')" title="Excluir" style="color:var(--text3)">🗑</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── Settings ──
+function openSettings() {
+  document.getElementById('s-apikey').value = cfg.apiKey || '';
+  document.getElementById('s-binid').value  = cfg.binId  || '';
+  document.getElementById('s-name').value   = cfg.name   || '';
+  document.getElementById('settings-modal').classList.add('open');
+}
+function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
+function closeSettingsBg(e) { if (e.target === document.getElementById('settings-modal')) closeSettings(); }
+
+function saveSettings() {
+  cfg.apiKey = document.getElementById('s-apikey').value.trim() || cfg.apiKey;
+  cfg.binId  = document.getElementById('s-binid').value.trim()  || cfg.binId;
+  cfg.name   = document.getElementById('s-name').value.trim()   || cfg.name;
+  saveCfg();
+  document.getElementById('header-name').textContent = cfg.name;
+  closeSettings();
+  toast('Configurações salvas.');
+}
+
+function resetConfig() {
+  if (!confirm('Isso vai desconectar o banco de dados. Deseja continuar?')) return;
+  localStorage.removeItem(CFG_KEY);
+  location.reload();
+}
+
+// ── Toast ──
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ── Keyboard shortcuts ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeSettings(); }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    if (document.getElementById('modal').classList.contains('open')) saveTask();
+  }
+});
+
+init();
+</script>
+</body>
+</html>
